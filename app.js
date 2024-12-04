@@ -1,18 +1,17 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const connectDB = require('./database/db');
-// const postRoutes = require('./routes/postRoutes');
-// const commentRoutes = require('./routes/commentRoutes');
-
+const express = require("express");
 const app = express();
-
-connectDB();
-
+const bodyParser = require("body-parser");
+const connectDB = require("./database/db");
+const dotenv = require("dotenv").config();
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// app.use('/posts', postRoutes);
-// app.use('/comments', commentRoutes);
+const postsRoutes = require("./routes/posts_routes");
+app.use("/posts", postsRoutes); //brings all the routes we declared on ./routes/post_routes, and connects it to our app (makes it work like we wrote it on app.js).
+app.get("/about", (req, res) => {
+  res.send("about response");
+});
+connectDB();
 
 // Start server
 const PORT = process.env.PORT;
