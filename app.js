@@ -7,6 +7,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const postsRoutes = require("./routes/posts_routes");
+const commentRoutes = require("./routes/comments_routes");
+app.use("/comments", commentRoutes);
 app.use("/posts", postsRoutes); //brings all the routes we declared on ./routes/post_routes, and connects it to our app (makes it work like we wrote it on app.js).
 app.get("/about", (req, res) => {
   res.send("about response");
