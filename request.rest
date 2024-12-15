@@ -7,7 +7,7 @@
 GET http://localhost:3000/posts 
 ###
 //Get post by id
-GET http://localhost:3000/posts/675ebda48b4e9b57f7c24f4c
+GET http://localhost:3000/posts/675ec4c7c50e86442f7f8432
 
 
 ###
@@ -31,7 +31,7 @@ Content-Type: application/json
 
 ###
 //Update post by id
-PUT http://localhost:3000/posts/675ebdb38b4e9b57f7c24f4e
+PUT http://localhost:3000/posts/675ec4c7c50e86442f7f8432
 Content-Type: application/json
 
 {
@@ -43,7 +43,7 @@ Content-Type: application/json
 GET http://localhost:3000/about
 
 ###
-DELETE http://localhost:3000/posts/675ebfcb79c69cf2af9efdd7
+DELETE http://localhost:3000/posts/675ec4c7c50e86442f7f8432
 
 //Comments API
 ###

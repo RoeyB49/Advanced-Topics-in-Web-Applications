@@ -35,9 +35,21 @@ const createPost = async (req, res) => {
   }
 };
 
-const deletePost = (req, res) => {
+const deletePost = async (req, res) => {
   const postId = req.params.id;
-  res.send("Delete Post by id:" + postId);
+  try {
+    const post = await postModel.findByIdAndDelete(postId); 
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" }); 
+    }
+    res
+      .status(200)
+      .json({ message: "Post with ID ${postId} deleted successfully" }); 
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting post", error: error.message }); 
+  }
 };
 
 const getPostById = async (req, res) => {
