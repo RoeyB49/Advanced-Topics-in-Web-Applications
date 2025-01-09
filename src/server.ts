@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import postsRoutes from "./routes/posts_routes";
 import commentRoutes from "./routes/comments_routes";
 import authRoutes from "./routes/auth_routes";
+import {setupSwagger} from '../swaggerConfig';
 
 const app = express();
 const db = mongoose.connection;
@@ -26,7 +27,7 @@ app.use("/auth", authRoutes);
 app.get("/about", (req, res) => {
   res.send("about response");
 });
-
+setupSwagger(app);
 const initApp = () => {
   return new Promise<Express>((resolve, reject) => {
     //if the promise succeed, it will the app param to app.ts which is an <Express> type that we destructured from express

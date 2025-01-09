@@ -10,13 +10,18 @@ class PostsController extends BaseController<iPost> {
   }
 
   async create(req: Request, res: Response) {
-    const userId = req.params.userId; //extracting the id from the token in the auth controller, and attaching it to
-    const post = { ...req.body, sender: userId };
-    req.body = post;
-    super.create(req, res);
+    try {
+      const userId = req.params.userId;
+      const post = { ...req.body, sender: userId };
+      req.body = post;
+      super.create(req, res);
+    } catch (error) {
+      res.status(500).json({ message: "Error creating post", error });
+    }
   }
 }
 export default new PostsController();
+
 
 //---------------------Newer Version---------------------
 // const getAllPosts = async (req: Request, res: Response) => {
