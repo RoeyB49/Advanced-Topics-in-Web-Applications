@@ -1,70 +1,30 @@
 import express from "express";
+const router = express.Router();
 import commentsController from "../controllers/comments_controller";
 import { authMiddleware } from "../controllers/auth_controller";
-import { validateUserId, validatePostId } from "../middleware/validate_user";
-
-const router = express.Router();
-
-router.get("/", commentsController.getAll.bind(commentsController));
-
-router.get("/posts/:postId", (req, res) => {
-  commentsController.getCommentsByPostId(req, res);
-});
-
-router.get(
-  "/posts/:postId",
-  validatePostId,
-  commentsController.getCommentsByPostId.bind(commentsController)
-);
-
-router.post(
-  "/",
-  authMiddleware,
-  validateUserId,
-  validatePostId,
-  commentsController.create.bind(commentsController)
-);
-
-router.post(
-    "/",
-    authMiddleware,
-    commentsController.create.bind(commentsController)
-  );
+// router.get("/posts/:postId", (req, res) => {
+//   commentsController.getCommentsByPostId(req, res);
+// });
 router.delete("/:id", authMiddleware, async (req, res) => {
   commentsController.deleteById.bind(commentsController)(req, res);
 });
+router.get("/", (req, res) => {
+  commentsController.getAll(req, res);
+});
+router.post(
+  "/",
+  authMiddleware,
+  commentsController.create.bind(commentsController)
+);
+router.put("/:id", (req, res) => {
+  commentsController.update(req, res);
+});
+router.get("/:id", (req, res) => {
+  commentsController.getById(req, res);
+});
+// router.get("/posts/:postId", commentsController.getCommentsByPostId);
 
 export default router;
-
-
-// import express from "express";
-// const router = express.Router();
-// import commentsController from "../controllers/comments_controller";
-// import { authMiddleware } from "../controllers/auth_controller";
-
-// // router.get("/posts/:postId", (req, res) => {
-// //   commentsController.getCommentsByPostId(req, res);
-// // });
-// router.delete("/:id", authMiddleware, async (req, res) => {
-//   commentsController.deleteById.bind(commentsController)(req, res);
-// });
-// router.get("/", (req, res) => {
-//   commentsController.getAll(req, res);
-// });
-// router.post(
-//   "/",
-//   authMiddleware,
-//   commentsController.create.bind(commentsController)
-// );
-// router.put("/:id", (req, res) => {
-//   commentsController.update(req, res);
-// });
-// router.get("/:id", (req, res) => {
-//   commentsController.getById(req, res);
-// });
-// // router.get("/posts/:postId", commentsController.getCommentsByPostId);
-
-// export default router;
 
 //---------------------Backup---------------------
 // router.delete("/:id", (req, res) => {

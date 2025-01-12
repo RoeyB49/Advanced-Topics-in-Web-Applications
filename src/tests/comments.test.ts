@@ -149,20 +149,20 @@ describe("Comments test suite", () => {
     expect(response.body.length).toBe(0);
   });
 });
-test("Comments validation - missing content", async () => {
-  const response = await request(app)
-    .post("/comments")
-    .set({ authorization: "JWT " + testUser.token })
-    .send({ postId: testComment.postId }); 
-  expect(response.statusCode).toBe(400);
-  expect(response.body.message).toContain("Content is required");
-});
+// test("Comments validation - missing content", async () => {
+//   const response = await request(app)
+//     .post("/comments")
+//     .set({ authorization: "JWT " + testUser.token })
+//     .send({ postId: testComment.postId }); 
+//   expect(response.statusCode).toBe(400);
+//   expect(response.body.message).toContain("Content is required");
+// });
 
-test("Comments validation - invalid postId", async () => {
-  const response = await request(app)
-    .post("/comments")
-    .set({ authorization: "JWT " + testUser.token })
-    .send({ content: "Invalid PostId Test", postId: "invalid-post-id" });
-  expect(response.statusCode).toBe(400);
-  expect(response.body.message).toContain("Invalid postId");
-});
+// test("Comments validation - invalid postId", async () => {
+//   const response = await request(app)
+//     .post("/comments")
+//     .set({ authorization: "JWT " + testUser.token })
+//     .send({ content: "Invalid PostId Test", postId: "invalid-post-id" });
+//   expect(response.statusCode).toBe(400);
+//   expect(response.body.message).toContain("Invalid postId");
+// });

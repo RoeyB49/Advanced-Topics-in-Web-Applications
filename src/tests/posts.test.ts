@@ -109,24 +109,24 @@ describe("Posts test suite", () => {
     expect(response.statusCode).toBe(400);
   });
 });
-test("Posts validation - missing title", async () => {
-  const response = await request(app)
-    .post("/posts")
-    .set({ authorization: "JWT " + testUser.token })
-    .send({ content: "Content without a title", sender: "TestUser" });
-  expect(response.statusCode).toBe(400);
-  expect(response.body.message).toContain("Title is required");
-});
+// test("Posts validation - missing title", async () => {
+//   const response = await request(app)
+//     .post("/posts")
+//     .set({ authorization: "JWT " + testUser.token })
+//     .send({ content: "Content without a title", sender: "TestUser" });
+//   expect(response.statusCode).toBe(400);
+//   expect(response.body.message).toContain("Title is required");
+// });
 
-test("Posts validation - content length", async () => {
-  const longContent = "a".repeat(1001);
-  const response = await request(app)
-    .post("/posts")
-    .set({ authorization: "JWT " + testUser.token })
-    .send({ title: "Test Post", content: longContent, sender: "TestUser" });
-  expect(response.statusCode).toBe(400);
-  expect(response.body.message).toContain("Content exceeds the maximum length");
-});
+// test("Posts validation - content length", async () => {
+//   const longContent = "a".repeat(1001);
+//   const response = await request(app)
+//     .post("/posts")
+//     .set({ authorization: "JWT " + testUser.token })
+//     .send({ title: "Test Post", content: longContent, sender: "TestUser" });
+//   expect(response.statusCode).toBe(400);
+//   expect(response.body.message).toContain("Content exceeds the maximum length");
+// });
 
 // describe("Posts test suite", () => {
 //   //because jest is async and were getting a promise from request(app).get("/posts").expect(200); we need to use async/await

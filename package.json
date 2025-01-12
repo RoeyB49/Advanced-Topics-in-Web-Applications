@@ -10,6 +10,7 @@
     "testAuth": "tsc && jest --detectOpenHandles --forceExit auth.test.ts",
     "testPost": "tsc && jest --detectOpenHandles --forceExit posts.test.ts",
     "testComm": "tsc && jest --detectOpenHandles --forceExit comments.test.ts ",
+    "testVal": "tsc && jest --detectOpenHandles --forceExit validate.test.ts ",
     "lint": "eslint . --ext .ts"
   },
   "keywords": [],
@@ -23,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.3",
     "swagger-jsdoc": "^6.2.8",
+    "swagger-ui": "^5.18.2",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {

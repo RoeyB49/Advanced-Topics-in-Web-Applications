@@ -1,12 +1,34 @@
 //this file's purpose is to make the requests more generic.
 import { Request, Response } from "express";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
+
 class BaseController<T> {
-  //we're using a class so we wont have to pass the "model" type for each function.
+    //we're using a class so we wont have to pass the "model" type for each function.
   model: Model<T>;
   constructor(model: Model<T>) {
     this.model = model;
   }
+
+  private async validateRelationships(data: any): Promise<string | null> {
+    if (data.postId) {
+      const Post = require('../models/posts_model').default;
+      const post = await Post.findById(data.postId);
+      if (!post) {
+        return "Referenced post does not exist";
+      }
+    }
+
+    if (data.sender) {
+      const User = require('../models/users_model').default;
+      const user = await User.findById(data.sender);
+      if (!user) {
+        return "Referenced user does not exist";
+      }
+    }
+
+    return null;
+  }
+
   async getAll(req: Request, res: Response) {
     const senderFilter = req.query.sender;
     try {
@@ -19,7 +41,6 @@ class BaseController<T> {
       }
     } catch (error) {
       console.log(error);
-
       res.status(400).send(error);
     }
   }
@@ -35,15 +56,19 @@ class BaseController<T> {
       }
     } catch (error) {
       console.log(error);
-
       res.status(400).send(error);
     }
   }
 
-  async create(req: Request, res: Response) {
-    console.log(req.body);
+  async create(req: Request, res: Response): Promise<void> {
     const source = req.body;
     try {
+      const validationError = await this.validateRelationships(source);
+      if (validationError) {
+        res.status(400).send({ message: validationError });
+        return;
+      }
+
       const newSource = await this.model.create(source);
       res.status(201).send(newSource);
     } catch (error) {
@@ -53,11 +78,9 @@ class BaseController<T> {
       if (process.env.NODE_ENV !== "test") {
         console.log(error);
       }
-
       res.status(400).send(error);
     }
-  }
-
+}
   async deleteById(req: Request, res: Response) {
     const sourceId = req.params.id;
     try {
@@ -65,9 +88,7 @@ class BaseController<T> {
       if (!source) {
         return res.status(404).json({ message: "Post not found" });
       }
-      res
-        .status(200)
-        .json({ message: `Post with ID ${sourceId} deleted successfully` });
+      res.status(200).json({ message: `Post with ID ${sourceId} deleted successfully` });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Error deleting post", error: error });
@@ -79,6 +100,11 @@ class BaseController<T> {
     const sourceData = req.body;
 
     try {
+      const validationError = await this.validateRelationships(sourceData);
+      if (validationError) {
+        return res.status(400).send({ message: validationError });
+      }
+
       const source = await this.model.findByIdAndUpdate(sourceId, sourceData, {
         new: true,
       });
@@ -88,18 +114,18 @@ class BaseController<T> {
       res.status(200).send(source);
     } catch (error) {
       console.log(error);
-
       res.status(400).send({ message: error });
     }
   }
 }
 
+export default BaseController;
 // const createController = <T>(model: Model<T>) => {
 //   //factory function
 //   return new BaseController(model);
 // };
 // export default createController;
-export default BaseController;
+
 
 //Backup-------------------------------------------------------------------------------------------------------------------
 // const getAll = async (req: Request, res: Response, model: any) => {
