@@ -35,11 +35,12 @@ const invalidPost = {
   content: "Test content",
 };
 
-type User = IUser & { token?: string };
+type User = IUser & { token?: string; refreshToken?: string };
 
 const testUser: User = {
   email: "test@user.com",
   password: "testPassword",
+  refreshTokens: [],
 };
 
 describe("Posts test suite", () => {

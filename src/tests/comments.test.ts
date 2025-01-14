@@ -52,6 +52,7 @@ type User = IUser & { token?: string };
 const testUser: User = {
   email: "test@user.com",
   password: "testPassword",
+  refreshTokens: [],
 };
 
 describe("Comments test suite", () => {
@@ -153,7 +154,7 @@ describe("Comments test suite", () => {
 //   const response = await request(app)
 //     .post("/comments")
 //     .set({ authorization: "JWT " + testUser.token })
-//     .send({ postId: testComment.postId }); 
+//     .send({ postId: testComment.postId });
 //   expect(response.statusCode).toBe(400);
 //   expect(response.body.message).toContain("Content is required");
 // });
