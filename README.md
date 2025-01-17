@@ -48,3 +48,6 @@ export default tseslint.config({
   },
 })
 ```
+
+![xmixdrix](https://github.com/user-attachments/assets/70e800af-b8e7-47b9-8c40-a7428c72aaf1)
+
