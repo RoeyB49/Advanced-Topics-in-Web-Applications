@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Board from "./components/Board";
-import { Cell, GameState } from "./types/GameTypes";
+import { Board } from "./components/board";
+import { Cell, GameState } from "../types/gameTypes";
 import "./App.css";
 
 const App: React.FC = () => {
