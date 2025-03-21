@@ -4,6 +4,8 @@
   "description": "In this assignment, we will create a REST API using Node.js and Express.",
   "main": "index.js",
   "scripts": {
+    "prod": "cp .env_prod .env&&tsc -p tsconfig_prod.json  && pm2 restart ecosystem.config.js --env production",
+    "prod2": "cp .env_prod .env&&tsc -p tsconfig_prod.json && node dist/src/app.js",
     "dev": "nodemon ./src/app.ts",
     "start": "tsc && node ./dist/app.js",
     "test": "tsc && jest --detectOpenHandles --forceExit --runInBand --coverage",
@@ -23,6 +25,7 @@
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.3",
+    "pm2": "^6.0.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui": "^5.18.2",
     "swagger-ui-express": "^5.0.1"

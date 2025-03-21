@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import postsRoutes from "./routes/posts_routes";
 import commentRoutes from "./routes/comments_routes";
 import authRoutes from "./routes/auth_routes";
-import {setupSwagger} from '../swaggerConfig';
+import { setupSwagger } from '../swaggerConfig';
 
 const app = express();
 const db = mongoose.connection;
@@ -32,7 +32,6 @@ const initApp = () => {
   return new Promise<Express>((resolve, reject) => {
     //if the promise succeed, it will the app param to app.ts which is an <Express> type that we destructured from express
     //the purpose of this function is to  activate the db server befor the app server
-
     if (process.env.MONGO_URI === undefined) {
       console.error("MONGO_URI is not set");
       reject();
