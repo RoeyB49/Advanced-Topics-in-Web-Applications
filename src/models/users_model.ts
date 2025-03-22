@@ -1,23 +1,25 @@
-import mongoose from "mongoose";
-//postSchema - defines the pattern of the collection
+import mongoose, { Schema, Document } from "mongoose";
 
-export interface IUser {
-  email: String;
-  password: String;
-  _id?: string; //unique id for each user
-  refreshTokens: string[]; // an array of tokens so the user could get a different token for each device
+// Define IUser interface correctly
+export interface IUser extends Document {
+  email: string;
+  password: string;
+  username?: string;
+  imagePath?: string;
+  _id: string;
+  refreshTokens: string[];
 }
-const userSchema = new mongoose.Schema<IUser>({
-  email: { type: String, required: true, unique: true }, //required=true - means that this paramter must have a value
+
+// Define the schema
+const userSchema = new Schema<IUser>({
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  refreshTokens: { type: [String], default: [] }, //an array of tokens so the user could get a different token for each device
+  username: { type: String, required: false, unique: false },
+  imagePath: { type: String, required: false, default: "" },
+  refreshTokens: { type: [String], default: [] },
 });
 
-const userModel = mongoose.model<IUser>("Users", userSchema); //were returning an object of type of postModel which uses the interface of "iPost"
+// Create the model
+const userModel = mongoose.model<IUser>("Users", userSchema);
 
 export default userModel;
-// const postSchema = new Schema({
-//   title: { type: String, required: true }, //required=true - means that this paramter must have a value
-//   content: String,
-//   sender: { type: String, required: true },
-// });

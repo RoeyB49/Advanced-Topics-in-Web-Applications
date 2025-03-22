@@ -157,60 +157,63 @@ const googleAuth = async (req: Request, res: Response) => {
  * User login handler
  */
 const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { emailOrUsername, password } = req.body;
 
-  // Validate required fields
-  if (!email || !password) {
-    res.status(400).send("Email and password are required");
+  if (
+    !emailOrUsername ||
+    !password ||
+    emailOrUsername.trim().length === 0 ||
+    password.trim().length === 0
+  ) {
+    res.status(400).send("Email and Password are required");
     return;
   }
-
   try {
-    // Find user by email
-    const user = await userModel.findOne({ email });
+    const user = await userModel.findOne({ $or: [{ email: emailOrUsername }, { username: emailOrUsername }] });
     if (!user) {
-      res.status(404).send("Invalid email or password");
+      res.status(400).send("Check email/username or password");
       return;
     }
-
-    // Verify password
-    const validPassword = await bcrypt.compare(
-      password,
-      user.password as string
-    );
-
+    
+    // Check if user has a password (might be a Google auth user)
+    if (!user.password) {
+      res.status(400).send("This account uses Google authentication");
+      return;
+    }
+    
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      res.status(400).send("Invalid email or password");
+      res.status(400).send("Check email/username or password");
       return;
     }
-
-    // Generate tokens
+    
     const tokens = generateTokens(user._id.toString());
     if (!tokens) {
-      res.status(500).send("Failed to generate authentication tokens");
+      res.status(500).send("Cannot Generate Tokens");
       return;
     }
-
-    // Store refresh token
-    if (!user.refreshTokens) {
+    
+    if (user.refreshTokens == null) {
       user.refreshTokens = [];
     }
     user.refreshTokens.push(tokens.refreshToken);
     await user.save();
 
-    // Return user info and tokens
+    console.log("Login Valid");
     res.status(200).send({
-      _id: user._id,
       email: user.email,
-      username: user.id || email.split("@")[0],
+      _id: user._id,
+      imagePath: user.imagePath,
+      username: user.username, 
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     });
+    return;
   } catch (err) {
-    res.status(400).send("Login failed");
+    res.status(400).send(err);
+    return;
   }
 };
-
 /**
  * Authentication middleware
  */
