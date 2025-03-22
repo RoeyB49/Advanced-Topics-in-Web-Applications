@@ -6,9 +6,12 @@ import mongoose from "mongoose";
 import postsRoutes from "./routes/posts_routes";
 import commentRoutes from "./routes/comments_routes";
 import authRoutes from "./routes/auth_routes";
-import { setupSwagger } from '../swaggerConfig';
+import { setupSwagger } from "../swaggerConfig";
+import path from "path";
+import cors from "cors";
 
 const app = express();
+app.use(cors());
 const db = mongoose.connection;
 db.on("error", (err) => {
   console.error(err);
@@ -23,15 +26,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/comments", commentRoutes);
 app.use("/posts", postsRoutes); //brings all the routes we declared on ./routes/post_routes, and connects it to our app (makes it work like we wrote it on app.js).
-app.use("/auth", authRoutes);
+app.use("/auth", authRoutes);``
 app.get("/about", (req, res) => {
   res.send("about response");
 });
+const frontPath = path.join(__dirname, "../front"); // מתאים למבנה שלך
+app.use(express.static(frontPath));
+
+// כל בקשה שלא תואמת ל-API תחזיר את ה-React index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontPath, "index.html"));
+});
+
 setupSwagger(app);
 const initApp = () => {
   return new Promise<Express>((resolve, reject) => {
     //if the promise succeed, it will the app param to app.ts which is an <Express> type that we destructured from express
     //the purpose of this function is to  activate the db server befor the app server
+
     if (process.env.MONGO_URI === undefined) {
       console.error("MONGO_URI is not set");
       reject();

@@ -25,11 +25,11 @@ const generateTokens = (
 ): { accessToken: string; refreshToken: string } | null => {
   // Generate random values for token uniqueness
   const randomValue = Math.floor(Math.random() * 1000000);
-  
+
   if (!process.env.TOKEN_SECRET) {
     return null;
   }
-  
+
   const accessToken = jwt.sign(
     { _id: userId, random: randomValue },
     process.env.TOKEN_SECRET,
@@ -37,7 +37,7 @@ const generateTokens = (
       expiresIn: process.env.TOKEN_EXPIRATION || "1h",
     }
   );
-  
+
   const refreshToken = jwt.sign(
     { _id: userId, random: randomValue },
     process.env.TOKEN_SECRET,
@@ -45,7 +45,7 @@ const generateTokens = (
       expiresIn: process.env.REFRESH_TOKEN_EXPIRATION || "7d",
     }
   );
-  
+
   return { accessToken, refreshToken };
 };
 
@@ -54,32 +54,32 @@ const generateTokens = (
  */
 const register = async (req: Request, res: Response) => {
   const { email, password, username } = req.body;
-  
+
   // Validate required fields
   if (!email || !password) {
-     res.status(400).send("Email and password are required");
-     return;
+    res.status(400).send("Email and password are required");
+    return;
   }
-  
+
   try {
     // Check if user already exists
     const existingUser = await userModel.findOne({ email });
     if (existingUser) {
-       res.status(400).send("User with this email already exists");
-       return;
+      res.status(400).send("User with this email already exists");
+      return;
     }
-    
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    
+
     // Create user
     const user = await userModel.create({
       email,
       password: hashedPassword,
-      username: username || email.split('@')[0], // Default username if not provided
+      username: username || email.split("@")[0], // Default username if not provided
     });
-    
+
     res.status(201).send(user);
   } catch (err) {
     res.status(400).send(err);
@@ -91,32 +91,32 @@ const register = async (req: Request, res: Response) => {
  */
 const googleAuth = async (req: Request, res: Response) => {
   const { token } = req.body;
-  
+
   if (!token) {
-     res.status(400).send("Google token is required");
-     return;
+    res.status(400).send("Google token is required");
+    return;
   }
-  
+
   try {
     // Verify the Google ID token
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
+
     const payload = ticket.getPayload();
     if (!payload || !payload.email) {
-       res.status(400).send("Invalid Google token");
-       return;
+      res.status(400).send("Invalid Google token");
+      return;
     }
-    
+
     // Find or create user
     let user = await userModel.findOne({ email: payload.email });
-    
+
     if (!user) {
       // Create new user from Google data
-      const username = payload.email.split('@')[0];
-      
+      const username = payload.email.split("@")[0];
+
       user = await userModel.create({
         email: payload.email,
         username,
@@ -124,21 +124,21 @@ const googleAuth = async (req: Request, res: Response) => {
         googleId: payload.sub,
       });
     }
-    
+
     // Generate authentication tokens
     const tokens = generateTokens(user._id.toString());
     if (!tokens) {
-       res.status(500).send("Failed to generate authentication tokens");
-       return;
+      res.status(500).send("Failed to generate authentication tokens");
+      return;
     }
-    
+
     // Store refresh token
     if (!user.refreshTokens) {
       user.refreshTokens = [];
     }
     user.refreshTokens.push(tokens.refreshToken);
     await user.save();
-    
+
     // Return user info and tokens
     res.status(200).send({
       _id: user._id,
@@ -147,7 +147,6 @@ const googleAuth = async (req: Request, res: Response) => {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     });
-    
   } catch (error) {
     console.error("Google authentication error:", error);
     res.status(500).send("Failed to authenticate with Google");
@@ -159,52 +158,51 @@ const googleAuth = async (req: Request, res: Response) => {
  */
 const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  
+
   // Validate required fields
   if (!email || !password) {
-    
     res.status(400).send("Email and password are required");
     return;
   }
-  
+
   try {
     // Find user by email
     const user = await userModel.findOne({ email });
     if (!user) {
-       res.status(404).send("Invalid email or password");
-       return;
+      res.status(404).send("Invalid email or password");
+      return;
     }
-    
+
     // Verify password
     const validPassword = await bcrypt.compare(
       password,
       user.password as string
     );
-    
+
     if (!validPassword) {
-       res.status(400).send("Invalid email or password");
-       return;
+      res.status(400).send("Invalid email or password");
+      return;
     }
-    
+
     // Generate tokens
     const tokens = generateTokens(user._id.toString());
     if (!tokens) {
       res.status(500).send("Failed to generate authentication tokens");
       return;
     }
-    
+
     // Store refresh token
     if (!user.refreshTokens) {
       user.refreshTokens = [];
     }
     user.refreshTokens.push(tokens.refreshToken);
     await user.save();
-    
+
     // Return user info and tokens
     res.status(200).send({
       _id: user._id,
       email: user.email,
-      username: user.id || email.split('@')[0],
+      username: user.id || email.split("@")[0],
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     });
@@ -223,24 +221,27 @@ export const authMiddleware = (
 ) => {
   const authHeader = req.header("authorization");
   if (!authHeader) {
-     res.status(401).send("Access Denied: No token provided");
-     return;
+    res.status(401).send("Access Denied: No token provided");
+    return;
   }
-  
+
   const token = authHeader.split(" ")[1]; // Extract token from "Bearer {token}"
-  
+
   if (!token) {
-     res.status(401).send("Access Denied: Invalid token format");
-     return;
+    res.status(401).send("Access Denied: Invalid token format");
+    return;
   }
-  
+
   if (!process.env.TOKEN_SECRET) {
-     res.status(500).send("Server Error: Missing token configuration");
-     return;
+    res.status(500).send("Server Error: Missing token configuration");
+    return;
   }
-  
+
   try {
-    const verified = jwt.verify(token, process.env.TOKEN_SECRET) as TokenPayload;
+    const verified = jwt.verify(
+      token,
+      process.env.TOKEN_SECRET
+    ) as TokenPayload;
     req.params.userId = verified._id;
     next();
   } catch (error) {
@@ -253,42 +254,45 @@ export const authMiddleware = (
  */
 const logout = async (req: Request, res: Response) => {
   const { refreshToken } = req.body;
-  
+
   if (!refreshToken) {
-     res.status(400).send("Refresh token is required");
-     return;
+    res.status(400).send("Refresh token is required");
+    return;
   }
-  
+
   if (!process.env.TOKEN_SECRET) {
-     res.status(500).send("Server Error: Missing token configuration");
-     return;
+    res.status(500).send("Server Error: Missing token configuration");
+    return;
   }
-  
+
   try {
     // Verify token
-    const payload = jwt.verify(refreshToken, process.env.TOKEN_SECRET) as TokenPayload;
-    
+    const payload = jwt.verify(
+      refreshToken,
+      process.env.TOKEN_SECRET
+    ) as TokenPayload;
+
     // Find user
     const user = await userModel.findById(payload._id);
     if (!user) {
-       res.status(404).send("User not found");
-       return;
+      res.status(404).send("User not found");
+      return;
     }
-    
+
     // Check if token exists in user's refresh tokens
     if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
       // Clear all tokens if suspicious activity
       user.refreshTokens = [];
       await user.save();
-       res.status(403).send("Invalid token");
-       return;
+      res.status(403).send("Invalid token");
+      return;
     }
-    
+
     // Remove this refresh token
     user.refreshTokens = user.refreshTokens.filter(
       (token) => token !== refreshToken
     );
-    
+
     await user.save();
     res.status(200).send("Successfully logged out");
   } catch (error) {
@@ -301,53 +305,56 @@ const logout = async (req: Request, res: Response) => {
  */
 const refresh = async (req: Request, res: Response) => {
   const { refreshToken } = req.body;
-  
+
   if (!refreshToken) {
-     res.status(400).send("Refresh token is required");
-     return;
+    res.status(400).send("Refresh token is required");
+    return;
   }
-  
+
   if (!process.env.TOKEN_SECRET) {
-     res.status(500).send("Server Error: Missing token configuration");
-     return;
+    res.status(500).send("Server Error: Missing token configuration");
+    return;
   }
-  
+
   try {
     // Verify token
-    const payload = jwt.verify(refreshToken, process.env.TOKEN_SECRET) as TokenPayload;
-    
+    const payload = jwt.verify(
+      refreshToken,
+      process.env.TOKEN_SECRET
+    ) as TokenPayload;
+
     // Find user
     const user = await userModel.findById(payload._id);
     if (!user) {
-       res.status(404).send("User not found");
-       return;
+      res.status(404).send("User not found");
+      return;
     }
-    
+
     // Check if token exists in user's refresh tokens
     if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
       // Clear all tokens if suspicious activity
       user.refreshTokens = [];
       await user.save();
-       res.status(403).send("Invalid token");
-       return;
+      res.status(403).send("Invalid token");
+      return;
     }
-    
+
     // Generate new tokens
     const newTokens = generateTokens(user._id.toString());
     if (!newTokens) {
-       res.status(500).send("Failed to generate tokens");
-       return;
+      res.status(500).send("Failed to generate tokens");
+      return;
     }
-    
+
     // Remove old refresh token
     user.refreshTokens = user.refreshTokens.filter(
       (token) => token !== refreshToken
     );
-    
+
     // Add new refresh token
     user.refreshTokens.push(newTokens.refreshToken);
     await user.save();
-    
+
     // Return new tokens
     res.status(200).send({
       accessToken: newTokens.accessToken,
